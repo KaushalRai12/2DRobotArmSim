@@ -74,7 +74,7 @@ where 𝐽 is the Jacobian matrix, and Δ𝜃 represents the small changes in jo
 4. **Cross Product for Rotation:**
   - When calculating how much to rotate a joint, we use the 2D cross product to find the direction and magnitude of the needed rotation. The cross product between the vector pointing from the joint to the end-effector and the vector pointing from the joint to the target gives the necessary rotation adjustment.
     
-By leveraging these linear algebra concepts, the simulation can efficiently compute how each joint needs to move to reach the target, making the arm's movement both accurate and smooth.
+By applying these linear algebra concepts, the simulation can efficiently compute how each joint needs to move to reach the target, making the arm's movement both accurate and smooth.
 
 ## 💡 Optimization Notes
 - **Learning Rate**: Controls how aggressively the joint angles are updated. A higher learning rate can speed up movement but may result in instability.
