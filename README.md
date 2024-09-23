@@ -1,6 +1,6 @@
 # 2D Robot Arm Simulation with Inverse Kinematics
 
-![2D Robot Arm Simulation](lithophaneexample.png)
+![2D Robot Arm Simulation](robotsimexample.png)
 
 This Python project simulates a 2D robotic arm controlled by inverse kinematics to reach a target point on the screen. The arm consists of multiple segments, and its joints are adjusted to move the end-effector (tip of the arm) towards a user-defined target, represented by a blue dot. The simulation includes smooth, optimized movements and interactive controls.
 
@@ -62,14 +62,25 @@ The core of this project relies on linear algebra to solve the inverse kinematic
 
 1. **Vector Representation:**
   - Each segment of the robotic arm is treated as a vector. The position of the end-effector is calculated using the sum of these vectors, starting from the base of the arm:
-    $$\[
+    $$\
 \text{End-Effector Position} = \sum_{i=1}^{n} \left( \text{Length}_i \cdot \left( \cos(\theta_i), \sin(\theta_i) \right) \right)
-\]$$
-
-α is the learning rate. This method iteratively adjusts the joint angles until the end-effector reaches the target position.
-Cross Product for Rotation:
-
-When calculating how much to rotate a joint, we use the 2D cross product to find the direction and magnitude of the needed rotation. The cross product between the vector pointing from the joint to the end-effector and the vector pointing from the joint to the target gives the necessary rotation adjustment.
+\$$
+2. **Jacobian Matrix:**
+  - n the Jacobian Transpose method, the relationship between small changes in joint angles (Δ𝜃) and the resulting changes in the end-effector’s position (Δ𝑥, Δ𝑦) is described using the Jacobian matrix:
+    $$\
+\Delta \mathbf{x} = J \cdot \Delta \boldsymbol{\theta}
+\$$ 
+where 𝐽
+J is the Jacobian matrix, and Δ𝜃 represents the small changes in joint angles. The Jacobian matrix captures the partial derivatives of the end-effector’s position with respect to each joint angle.
+3. **Jacobian Transpose Method:**
+    -  To adjust the joint angles, we use the Jacobian Transpose method to calculate an update for the angles:
+      $$\
+\text{cross product} = v_1[0] \cdot v_2[1] - v_1[1] \cdot v_2[0]
+\$$
+    -  where 𝑒 is the error vector between the current end-effector position and the target, 𝐽^𝑇 is the transpose of the Jacobian, and 𝛼 is the learning rate. This method iteratively adjusts the joint angles until the end-effector reaches the target position.
+4. **Cross Product for Rotation:**
+  - When calculating how much to rotate a joint, we use the 2D cross product to find the direction and magnitude of the needed rotation. The cross product between the vector pointing from the joint to the end-effector and the vector pointing from the joint to the target gives the necessary rotation adjustment.
+    
 By leveraging these linear algebra concepts, the simulation can efficiently compute how each joint needs to move to reach the target, making the arm's movement both accurate and smooth.
 
 ## 💡 Optimization Notes
