@@ -1,3 +1,13 @@
+# Project Name: 2D Robot Arm Simulation with Inverse Kinematics
+# Author: Uijin Cho
+# Github: https://github.com/jinc77/2DRobotArmSim
+# Contact: jinc3930@gmail.com
+# License: MIT License
+# Description: Simulate 2D Robot Arm movement with linear algebra & inverse kinematics concepts
+
+# License Details:
+# This project is licensed under the MIT License – see the LICENSE file for details.
+
 import pygame
 import math
 import numpy as np
