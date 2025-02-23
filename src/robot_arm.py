@@ -49,6 +49,9 @@ completed_points = set()  # To track which points we've completed
 point_completion_time = 0  # To track when we started waiting at a point
 POINT_WAIT_TIME = 5000  # 5 seconds in milliseconds
 
+# Add these with other global variables
+previous_angles = [0, 0, 0]  # To track previous angles for delta calculations
+
 def transform_to_screen(x, y):
     """Transform from mathematical coordinates to screen coordinates"""
     return (x + 400, 400 - y)  # Center is (400,400) on screen
@@ -71,8 +74,28 @@ def forward_kinematics(angles, lengths):
     screen_positions = [transform_to_screen(x, y) for x, y in joint_positions]
     return screen_positions
 
+def calculate_angle_differences(current, previous):
+    """Calculate absolute angle differences"""
+    return [abs(c - p) for c, p in zip(current, previous)]
+
+def calculate_relative_angles(angles):
+    """Calculate relative angles between segments"""
+    # First angle is relative to Y-axis
+    ab_angle = angles[0]
+    # Second angle is relative to first segment
+    bc_angle = angles[1] - angles[0]
+    # Third angle is relative to second segment
+    cd_angle = angles[2] - angles[1]
+    return ab_angle, bc_angle, cd_angle
+
 def draw_arm(screen, angles, lengths):
+    global previous_angles
     joint_positions = forward_kinematics(angles, lengths)
+    
+    # Calculate relative angles and differences
+    ab_angle, bc_angle, cd_angle = calculate_relative_angles(angles)
+    angle_diffs = calculate_angle_differences(angles, previous_angles)
+    max_angle_diff = max(angle_diffs)
     
     # Draw the path and points if exists
     if current_path:
@@ -97,15 +120,36 @@ def draw_arm(screen, angles, lengths):
     # Draw end effector (point D)
     pygame.draw.circle(screen, RED, joint_positions[-1], 8)
     
-    # Display angles and positions
+    # Display metrics
     font = pygame.font.SysFont(None, 24)
-    end_effector = transform_from_screen(*joint_positions[-1])
-    text = font.render(f'Point D: ({int(end_effector[0])}, {int(end_effector[1])})', True, BLACK)
-    screen.blit(text, (20, 20))
+    y_offset = 20
     
-    for i, angle in enumerate(angles):
-        text_angle = font.render(f'Angle {i + 1}: {int(angle)}°', True, BLACK)
-        screen.blit(text_angle, (20, 50 + i * 30))
+    # 1. Display dot numbers
+    if current_path:
+        for i, point in enumerate(current_path):
+            num_text = font.render(str(i+1), True, BLACK)
+            screen.blit(num_text, (point[0] + 10, point[1] - 10))
+    
+    # Display positions and angles
+    metrics = [
+        f"B pos: ({int(joint_positions[1][0]-400)}, {int(400-joint_positions[1][1])})",
+        f"A-B ∡: {int(ab_angle)}°",
+        f"Δ A-B ∡: {int(angle_diffs[0])}°",
+        f"C pos: ({int(joint_positions[2][0]-400)}, {int(400-joint_positions[2][1])})",
+        f"B-C ∡: {int(bc_angle)}°",
+        f"Δ B-C ∡: {int(angle_diffs[1])}°",
+        f"D pos: ({int(joint_positions[3][0]-400)}, {int(400-joint_positions[3][1])})",
+        f"C-D ∡: {int(cd_angle)}°",
+        f"Δ C-D ∡: {int(angle_diffs[2])}°",
+        f"Max Δ ∡: {int(max_angle_diff)}°"
+    ]
+    
+    for i, metric in enumerate(metrics):
+        text = font.render(metric, True, BLACK)
+        screen.blit(text, (20, y_offset + i * 30))
+    
+    # Update previous angles for next frame
+    previous_angles = angles.copy()
 
 def calculate_path(start, end, num_points):
     """Calculate equally spaced points along the line"""
@@ -224,6 +268,10 @@ while running:
 
     # Draw the arm
     draw_arm(screen, current_angles, arm_lengths)
+    
+    # Update previous_angles if not moving
+    if not is_moving:
+        previous_angles = current_angles.copy()
     
     pygame.display.flip()
     clock.tick(30)
